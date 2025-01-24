@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,6 +21,8 @@ public class GameBoard : MonoBehaviour
     private float screenHeight;
     private float countryWidth;
     private float countryHeight;
+
+    private int level = 1;
 
     void Start()
     {
@@ -63,7 +66,7 @@ public class GameBoard : MonoBehaviour
     StartCoroutine(InstantiateObjects(positions, countryScale, objectiveSprite, objectives));
 }
 
-private System.Collections.IEnumerator InstantiateObjects(
+private IEnumerator InstantiateObjects(
     List<(int, int)> positions,
     float countryScale,
     Sprite objectiveSprite,
@@ -114,7 +117,49 @@ private System.Collections.IEnumerator InstantiateObjects(
     }
 
     public void IncreaseScore()
+{
+    initialObjectives--;
+
+    if (initialObjectives <= 0)
     {
-        //todo
+        // Reset board and advance to the next level
+        StartCoroutine(DestroyRemainingCountries());
+
+        // Increment the level
+        level++;
+
+        // Calculate the next starting board values based on the level
+        int rows = Mathf.FloorToInt((float)(2.5 * Math.Tanh((level - 6.0) / 4.0) + 6.0));
+        int columns = Mathf.FloorToInt((float)(Math.Tanh((level - 8.0) / 4.0) + 5.5));
+
+        // Calculate the next starting objectives
+        initialObjectives = Mathf.FloorToInt((float)(4.0 * Math.Tanh((level - 5.0) / 4.0) + 7.0));
+
+        // Calculate the next starting time
+        float timeLimit = Mathf.FloorToInt((float)(100.0 / (level + 2.0) + 25.0));
+
+        // Calculate the next starting lives
+        int lives = Mathf.FloorToInt((float)(30.0 / (level + 12.0) + 3.0));
+
+        // Calculate next total countries
+        int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
+
+        Debug.Log($"Level {level}: Rows={rows}, Columns={columns}, Objectives={initialObjectives}, Time={timeLimit}, Lives={lives}, Countries={maxCountries}");
+
+        // Reinitialize the board
+        // InitializeBoard(rows, columns, initialObjectives, maxCountries);
+    }
+    }
+
+    private IEnumerator DestroyRemainingCountries()
+    {
+        foreach (GameObject country in remainingCountries)
+        {
+            if (country == null)
+                continue;
+
+            Destroy(country);
+            yield return new WaitForSeconds(0.05f);
+        }
     }
 }

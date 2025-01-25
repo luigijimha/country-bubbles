@@ -18,17 +18,24 @@ public class Clock : MonoBehaviour
 
     void Update()
     {
-        currentTimer = Time.time - startTimer;
-        clockLabel.text = "Time: " + Mathf.CeilToInt((float)(timeLimit - currentTimer)).ToString();
+        if(clockRunning) {
+            currentTimer = Time.time - startTimer;
+            clockLabel.text = "Time: " + Mathf.CeilToInt((float)(timeLimit - currentTimer)).ToString();
 
-        if (currentTimer >= timeLimit)
-        {
-            GameOver();
+            double red = currentTimer / timeLimit;
+            double green = (timeLimit - currentTimer) / timeLimit;
+            clockLabel.color = new Color((float) red, (float) green, 0);
+
+            if (currentTimer >= timeLimit)
+            {
+                GameOver();
+            }
         }
     }
 
     private void GameOver()
     {
+        clockRunning = false;
         SceneManager.LoadScene("GameOver");
     }
 
@@ -39,5 +46,9 @@ public class Clock : MonoBehaviour
 
     public void StopClock() {
         clockRunning = false;
+    }
+
+    public void SetTimeLimit(double timeLimit) {
+        this.timeLimit = timeLimit;
     }
 }

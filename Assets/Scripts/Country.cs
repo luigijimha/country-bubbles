@@ -18,8 +18,11 @@ public class Country : MonoBehaviour
     public Country(bool isObjective, Sprite sprite)
     {
         this.isObjective = isObjective;
-        GetComponent<SpriteRenderer>().sprite = sprite;
+        var spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = sprite;
+        spriteRenderer.sortingLayerName = "TouchObject";
     }
+
 
     private void OnMouseDown()
     {
@@ -28,16 +31,14 @@ public class Country : MonoBehaviour
 
     private void SelectCountry()
     {
-        Debug.Log("Country touched");
-        
-        /*if (isObjective)
+        if (isObjective)
         {
             scoreBoard.IncreaseScore();
         }
         else
         {
             livesBoard.DecreaseLives();
-        }*/
+        }
 
         //todo: animation
         //animator.SetTrigger("Pop");

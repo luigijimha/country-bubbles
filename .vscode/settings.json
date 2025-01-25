@@ -56,5 +56,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "country-bubbles.sln"
+    "dotnet.defaultSolution": "Country Bubbles.sln"
 }

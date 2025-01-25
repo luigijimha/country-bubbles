@@ -16,7 +16,7 @@ public class GameBoard : MonoBehaviour
     public int initialObjectives = 2;
     public int initialSprites = 2;
 
-    private readonly float imageRatio = 2000;
+    private readonly float imageRatio = 1;
     private float screenWidth;
     private float screenHeight;
     private float countryWidth;
@@ -28,6 +28,7 @@ public class GameBoard : MonoBehaviour
     {
         screenWidth = transform.localScale.x;
         screenHeight = transform.localScale.y;
+        Debug.Log("initializing values " + screenWidth + " " + screenHeight);
         clock = GameObject.FindWithTag("Clock").GetComponent<Clock>();
         InitializeBoard(initialRows, initialColumns, initialObjectives, initialSprites);
     }
@@ -40,6 +41,7 @@ public class GameBoard : MonoBehaviour
     // Scale of countries
     countryWidth = (screenWidth - padding * (columns + 1)) / columns;
     countryHeight = (screenHeight - padding * (rows + 1)) / rows;
+    Debug.Log("measures values " + countryWidth + " " + countryHeight);
     float countryScale = (countryWidth < countryHeight ? countryWidth : countryHeight) / imageRatio;
 
     // List of positions

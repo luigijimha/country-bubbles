@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class Country : MonoBehaviour
+public class CountryButton : MonoBehaviour
 {
     private bool isObjective;
     private GameBoard scoreBoard;
@@ -15,7 +15,7 @@ public class Country : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public Country(bool isObjective, Sprite sprite)
+    public CountryButton(bool isObjective, Sprite sprite)
     {
         this.isObjective = isObjective;
         GetComponent<SpriteRenderer>().sprite = sprite;

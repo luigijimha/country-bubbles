@@ -326,7 +326,7 @@ GameObject:
   - component: {fileID: 230644458}
   - component: {fileID: 230644457}
   m_Layer: 0
-  m_Name: "Boto\u2560\xFCn Volver"
+  m_Name: Boton Volver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -478,7 +478,7 @@ GameObject:
   - component: {fileID: 822320380}
   - component: {fileID: 822320379}
   m_Layer: 0
-  m_Name: "PantallaCre\u2560\xFCditos 1"
+  m_Name: PantallaCreditos 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -201,7 +201,7 @@ GameObject:
   - component: {fileID: 435770386}
   - component: {fileID: 435770385}
   m_Layer: 0
-  m_Name: "Boto\u2560\xFCnHomePerder"
+  m_Name: BotonHomePerder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -470,7 +470,7 @@ GameObject:
   - component: {fileID: 1053937161}
   - component: {fileID: 1053937160}
   m_Layer: 0
-  m_Name: "Boto\u2560\xFCnReintentar"
+  m_Name: BotonReintentar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

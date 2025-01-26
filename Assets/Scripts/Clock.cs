@@ -13,14 +13,13 @@ public class Clock : MonoBehaviour
     void Start()
     {
         clockLabel = GetComponent<TextMeshProUGUI>();
-        
     }
 
     void Update()
     {
         if(clockRunning) {
             currentTimer = Time.time - startTimer;
-            clockLabel.text = "Time: " + Mathf.CeilToInt((float)(timeLimit - currentTimer)).ToString();
+            clockLabel.text = Mathf.CeilToInt((float)(timeLimit - currentTimer)).ToString();
 
             double red = currentTimer / timeLimit;
             double green = (timeLimit - currentTimer) / timeLimit;

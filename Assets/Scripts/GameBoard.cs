@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameBoard : MonoBehaviour
 {
@@ -10,13 +12,14 @@ public class GameBoard : MonoBehaviour
     public List<Sprite> countries;
     private Sprite[] selectedSprites;
     public GameObject countryPrefab;
-    public float padding = 0.01f;
-    public int initialRows = 4;
-    public int initialColumns = 3;
+    public float padding = 0.1f;
+    public int initialRows = 3;
+    public int initialColumns = 4;
     public int initialObjectives = 2;
     public int initialSprites = 2;
 
-    private readonly float imageRatio = 1;
+    private readonly float imageRatio = 0.15f;
+    private readonly float ScreenRatio = 8;
     private float screenWidth;
     private float screenHeight;
     private float countryWidth;
@@ -24,87 +27,97 @@ public class GameBoard : MonoBehaviour
 
     private int level = 1;
 
+    private TextMeshProUGUI targetCounter;
+    private Image targetImage;
+
     void Start()
     {
-        screenWidth = transform.localScale.x;
-        screenHeight = transform.localScale.y;
-        Debug.Log("initializing values " + screenWidth + " " + screenHeight);
+        screenWidth = transform.localScale.x * ScreenRatio;
+        screenHeight = transform.localScale.y * ScreenRatio;
+        Debug.Log("Screen Width " + screenWidth + ", Screen Height: " + screenHeight);
         clock = GameObject.FindWithTag("Clock").GetComponent<Clock>();
+        targetCounter = GameObject.FindWithTag("Counter").GetComponent<TextMeshProUGUI>();
+        targetImage = GameObject.FindWithTag("Target").GetComponent<Image>();
         InitializeBoard(initialRows, initialColumns, initialObjectives, initialSprites);
     }
 
     private void InitializeBoard(int rows, int columns, int objectives, int totalCountries)
-{
-    Debug.Log("creating board");
-    remainingCountries = new GameObject[rows * columns];
-
-    // Scale of countries
-    countryWidth = (screenWidth - padding * (columns + 1)) / columns;
-    countryHeight = (screenHeight - padding * (rows + 1)) / rows;
-    Debug.Log("measures values " + countryWidth + " " + countryHeight);
-    float countryScale = (countryWidth < countryHeight ? countryWidth : countryHeight) / imageRatio;
-
-    // List of positions
-    List<(int, int)> positions = new();
-
-    // Populate positions
-    for (int i = 0; i < rows; i++)
     {
-        for (int j = 0; j < columns; j++)
+        Debug.Log("creating board");
+        remainingCountries = new GameObject[rows * columns];
+
+        // Scale of countries
+        countryWidth = (screenWidth - 2 * padding) / columns;
+        countryHeight = (screenHeight - 2 * padding - 0.5f) / rows;
+        Debug.Log("Country Width " + countryWidth + ", Country Height " + countryHeight);
+        float countryScale = imageRatio * (countryWidth < countryHeight ? countryWidth : countryHeight);
+
+        // List of positions
+        List<(int, int)> positions = new();
+
+        // Populate positions
+        for (int i = 0; i < rows; i++)
         {
-            positions.Add((i, j));
+            for (int j = 0; j < columns; j++)
+            {
+                positions.Add((i, j));
+            }
         }
+
+        // Shuffle sprites and positions
+        List<Sprite> shuffledCountries = new(countries);
+        ShuffleList(shuffledCountries);
+        ShuffleList(positions);
+
+        selectedSprites = shuffledCountries.GetRange(0, totalCountries - 1).ToArray();
+        Sprite objectiveSprite = shuffledCountries[totalCountries - 1];
+
+        // Start instantiation coroutine
+        StartCoroutine(InstantiateObjects(positions, countryScale, objectiveSprite, objectives));
+
+        targetImage.sprite = objectiveSprite;
+        targetCounter.text =$"x{initialObjectives}";
     }
 
-    // Shuffle sprites and positions
-    List<Sprite> shuffledCountries = new(countries);
-    ShuffleList(shuffledCountries);
-    ShuffleList(positions);
-
-    selectedSprites = shuffledCountries.GetRange(0, totalCountries - 1).ToArray();
-    Sprite objectiveSprite = shuffledCountries[totalCountries - 1];
-
-    // Start instantiation coroutine
-    StartCoroutine(InstantiateObjects(positions, countryScale, objectiveSprite, objectives));
-}
-
-private IEnumerator InstantiateObjects(
-    List<(int, int)> positions,
-    float countryScale,
-    Sprite objectiveSprite,
-    int objectives
-)
-{
-    int countryCounter = 0;
-    int objectiveCount = 0;
-
-    foreach (var (row, column) in positions)
+    private IEnumerator InstantiateObjects(
+        List<(int, int)> positions,
+        float countryScale,
+        Sprite objectiveSprite,
+        int objectives
+    )
     {
-        GameObject country = Instantiate(countryPrefab, transform);
-        country.transform.position = CalculatePosition(row, column);
-        country.transform.localScale = new Vector3(countryScale, countryScale, 0);
+        int countryCounter = 0;
+        int objectiveCount = 0;
 
-        bool isObj = objectiveCount < objectives && UnityEngine.Random.Range(0, 2) == 0;
-        if (isObj) objectiveCount++;
+        foreach (var (row, column) in positions)
+        {
+            GameObject country = Instantiate(countryPrefab, transform);
+            country.transform.position = CalculatePosition(row, column);
+            country.transform.localScale = new Vector3(countryScale, countryScale, 0);
 
-        country.GetComponent<Country>().OnStart();
-        country.GetComponent<Country>().SetIsObjective(isObj);
-        country.GetComponent<SpriteRenderer>().sprite = isObj
-            ? objectiveSprite
-            : selectedSprites[UnityEngine.Random.Range(0, selectedSprites.Length)];
+            bool isObj = objectiveCount++ < objectives;
 
-        remainingCountries[countryCounter++] = country;
+            country.GetComponent<Country>().OnStart();
+            country.GetComponent<Country>().SetIsObjective(isObj);
+            country.GetComponent<SpriteRenderer>().sprite = isObj
+                ? objectiveSprite
+                : selectedSprites[UnityEngine.Random.Range(0, selectedSprites.Length)];
 
-        yield return new WaitForSeconds(0.05f);
+            remainingCountries[countryCounter++] = country;
+
+            yield return new WaitForSeconds(0.05f);
+        }
+
+        clock.StartClock();
     }
-
-    clock.StartClock();
-}
 
     private Vector3 CalculatePosition(int row, int column)
     {
-        float x = countryWidth/2 + padding + column * (countryWidth + padding) - screenWidth/2;
-        float y = countryHeight/2 + padding + row * (countryHeight + padding) - screenHeight/2;
+        float x = padding + column * (countryWidth + padding) - screenWidth/2 + countryWidth/2;
+        float y = padding - row * (countryHeight + padding) + 0.8f;
+
+
+        Debug.Log($"Coordinates: ({x}, {y})");
 
         return new Vector3(x, y, 0);
     }
@@ -119,38 +132,38 @@ private IEnumerator InstantiateObjects(
     }
 
     public void IncreaseScore()
-{
-    initialObjectives--;
-
-    if (initialObjectives <= 0)
     {
-        // Reset board and advance to the next level
-        StartCoroutine(DestroyRemainingCountries());
+        targetCounter.text =$"x{--initialObjectives}";
 
-        // Increment the level
-        level++;
+        if (initialObjectives <= 0)
+        {
+            // Reset board and advance to the next level
+            StartCoroutine(DestroyRemainingCountries());
 
-        // Calculate the next starting board values based on the level
-        int rows = Mathf.FloorToInt((float)(2.5 * Math.Tanh((level - 6.0) / 4.0) + 6.0));
-        int columns = Mathf.FloorToInt((float)(Math.Tanh((level - 8.0) / 4.0) + 5.5));
+            // Increment the level
+            level++;
 
-        // Calculate the next starting objectives
-        initialObjectives = Mathf.FloorToInt((float)(4.0 * Math.Tanh((level - 5.0) / 4.0) + 7.0));
+            // Calculate the next starting board values based on the level
+            int columns = Mathf.FloorToInt((float)(2.5 * Math.Tanh((level - 6.0) / 4.0) + 6.0));
+            int rows = Mathf.FloorToInt((float)(Math.Tanh((level - 8.0) / 4.0) + 5.5));
 
-        // Calculate the next starting time
-        float timeLimit = Mathf.FloorToInt((float)(100.0 / (level + 2.0) + 25.0));
+            // Calculate the next starting objectives
+            initialObjectives = Mathf.FloorToInt((float)(4.0 * Math.Tanh((level - 5.0) / 4.0) + 7.0));
 
-        // Calculate the next starting lives
-        int lives = Mathf.FloorToInt((float)(30.0 / (level + 12.0) + 3.0));
+            // Calculate the next starting time
+            float timeLimit = Mathf.FloorToInt((float)(100.0 / (level + 2.0) + 25.0));
 
-        // Calculate next total countries
-        int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
+            // Calculate the next starting lives
+            int lives = Mathf.FloorToInt((float)(30.0 / (level + 12.0) + 3.0));
 
-        Debug.Log($"Level {level}: Rows={rows}, Columns={columns}, Objectives={initialObjectives}, Time={timeLimit}, Lives={lives}, Countries={maxCountries}");
+            // Calculate next total countries
+            int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
 
-        // Reinitialize the board
-        // InitializeBoard(rows, columns, initialObjectives, maxCountries);
-    }
+            Debug.Log($"Level {level}: Rows={rows}, Columns={columns}, Objectives={initialObjectives}, Time={timeLimit}, Lives={lives}, Countries={maxCountries}");
+
+            // Reinitialize the board
+            InitializeBoard(rows, columns, initialObjectives, maxCountries);
+        }
     }
 
     private IEnumerator DestroyRemainingCountries()

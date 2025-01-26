@@ -35,7 +35,7 @@ public class Clock : MonoBehaviour
     private void GameOver()
     {
         clockRunning = false;
-        SceneManager.LoadScene("GameOver");
+        SceneManager.LoadScene("Game Over Screen");
     }
 
     public void StartClock() {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameBoard : MonoBehaviour
 {
@@ -136,8 +137,9 @@ public class GameBoard : MonoBehaviour
             // Reset board and advance to the next level
             StartCoroutine(DestroyRemainingCountries());
 
-            // Increment the level
-            level++;
+            if(level++ == 10) {
+                SceneManager.LoadScene("Win Screen");
+            }
 
             // Calculate the next starting board values based on the level
             int columns = Mathf.FloorToInt((float)(2.5 * Math.Tanh((level - 6.0) / 4.0) + 6.0));

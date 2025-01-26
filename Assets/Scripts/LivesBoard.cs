@@ -24,6 +24,6 @@ public class LivesBoard : MonoBehaviour
 
     private void GameOver()
     {
-        SceneManager.LoadScene("GameOver");
+        SceneManager.LoadScene("Game Over Screen");
     }
 }

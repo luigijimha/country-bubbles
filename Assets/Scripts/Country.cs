@@ -6,43 +6,60 @@ public class Country : MonoBehaviour
     private bool isObjective;
     private GameBoard scoreBoard;
     private LivesBoard livesBoard;
-    private Animator animator;
+    private static bool gameRunning = false;
 
     public void OnStart()
     {
         scoreBoard = GameObject.FindWithTag("Board").GetComponent<GameBoard>();
         livesBoard = GameObject.FindWithTag("Lives").GetComponent<LivesBoard>();
-        animator = GetComponent<Animator>();
     }
 
     public Country(bool isObjective, Sprite sprite)
     {
         this.isObjective = isObjective;
-        var spriteRenderer = GetComponent<SpriteRenderer>();
-        spriteRenderer.sprite = sprite;
-        spriteRenderer.sortingLayerName = "TouchObject";
+        GetComponent<SpriteRenderer>().sprite = sprite;
     }
 
-
-    private void OnMouseDown()
-    {
+    private void OnMouseDown() {
         SelectCountry();
     }
 
+    /*private void Update()
+    {
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            if (touch.phase == TouchPhase.Began)
+            {
+                RaycastHit hit;
+                Ray ray = Camera.main.ScreenPointToRay(touch.position);
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    if (hit.collider != null && hit.collider.gameObject == gameObject)
+                    {
+                        SelectCountry();
+                    }
+                }
+            }
+        }
+    }*/
+
     private void SelectCountry()
     {
-        if (isObjective)
-        {
-            scoreBoard.IncreaseScore();
-        }
-        else
-        {
-            livesBoard.DecreaseLives();
-        }
+        if(gameRunning) {
+            if (isObjective)
+            {
+                scoreBoard.IncreaseScore();
+            }
+            else
+            {
+                livesBoard.DecreaseLives();
+            }
 
-        //todo: animation
-        //animator.SetTrigger("Pop");
-        Destroy(gameObject, 0.5f);
+            Destroy(gameObject, 0.5f);
+        }
     }
 
     public void SetIsObjective(bool isObjective) {

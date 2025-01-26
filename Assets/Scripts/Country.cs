@@ -8,7 +8,7 @@ public class Country : MonoBehaviour
     private LivesBoard livesBoard;
     private static bool gameRunning = false;
 
-    public void OnStart()
+    public void Start()
     {
         scoreBoard = GameObject.FindWithTag("Board").GetComponent<GameBoard>();
         livesBoard = GameObject.FindWithTag("Lives").GetComponent<LivesBoard>();
@@ -24,7 +24,7 @@ public class Country : MonoBehaviour
         SelectCountry();
     }
 
-    /*private void Update()
+    private void Update()
     {
         if (Input.touchCount > 0)
         {
@@ -44,7 +44,15 @@ public class Country : MonoBehaviour
                 }
             }
         }
-    }*/
+    }
+
+    public static void StartGame() {
+        gameRunning = true;
+    }
+
+    public static void StopGame() {
+        gameRunning = false;
+    }
 
     private void SelectCountry()
     {

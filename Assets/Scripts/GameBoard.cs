@@ -34,7 +34,6 @@ public class GameBoard : MonoBehaviour
     {
         screenWidth = transform.localScale.x * ScreenRatio;
         screenHeight = transform.localScale.y * ScreenRatio;
-        Debug.Log("Screen Width " + screenWidth + ", Screen Height: " + screenHeight);
         clock = GameObject.FindWithTag("Clock").GetComponent<Clock>();
         targetCounter = GameObject.FindWithTag("Counter").GetComponent<TextMeshProUGUI>();
         targetImage = GameObject.FindWithTag("Target").GetComponent<Image>();
@@ -43,13 +42,11 @@ public class GameBoard : MonoBehaviour
 
     private void InitializeBoard(int rows, int columns, int objectives, int totalCountries)
     {
-        Debug.Log("creating board");
         remainingCountries = new GameObject[rows * columns];
 
         // Scale of countries
         countryWidth = (screenWidth - 2 * padding) / columns;
         countryHeight = (screenHeight - 2 * padding - 0.5f) / rows;
-        Debug.Log("Country Width " + countryWidth + ", Country Height " + countryHeight);
         float countryScale = imageRatio * (countryWidth < countryHeight ? countryWidth : countryHeight);
 
         // List of positions
@@ -97,7 +94,6 @@ public class GameBoard : MonoBehaviour
 
             bool isObj = objectiveCount++ < objectives;
 
-            country.GetComponent<Country>().OnStart();
             country.GetComponent<Country>().SetIsObjective(isObj);
             country.GetComponent<SpriteRenderer>().sprite = isObj
                 ? objectiveSprite
@@ -109,15 +105,13 @@ public class GameBoard : MonoBehaviour
         }
 
         clock.StartClock();
+        Country.StartGame();
     }
 
     private Vector3 CalculatePosition(int row, int column)
     {
         float x = padding + column * (countryWidth + padding) - screenWidth/2 + countryWidth/2;
         float y = padding - row * (countryHeight + padding) + 0.8f;
-
-
-        Debug.Log($"Coordinates: ({x}, {y})");
 
         return new Vector3(x, y, 0);
     }
@@ -137,6 +131,8 @@ public class GameBoard : MonoBehaviour
 
         if (initialObjectives <= 0)
         {
+            Country.StopGame();
+
             // Reset board and advance to the next level
             StartCoroutine(DestroyRemainingCountries());
 
@@ -158,8 +154,6 @@ public class GameBoard : MonoBehaviour
 
             // Calculate next total countries
             int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
-
-            Debug.Log($"Level {level}: Rows={rows}, Columns={columns}, Objectives={initialObjectives}, Time={timeLimit}, Lives={lives}, Countries={maxCountries}");
 
             // Reinitialize the board
             InitializeBoard(rows, columns, initialObjectives, maxCountries);

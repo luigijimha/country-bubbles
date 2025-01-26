@@ -9,6 +9,7 @@ TagManager:
   - Lives
   - Target
   - Counter
+  - Objective
   layers:
   - Default
   - TransparentFX

@@ -14,8 +14,7 @@ public class LivesBoard : MonoBehaviour
 
     public void DecreaseLives()
     {
-        //? bug found. lives are decreasing in batches.
-        livesLabel.text = "Lives: " + --lives;
+        livesLabel.text = "Vidas: " + --lives;
 
         if (lives <= 0)
         {

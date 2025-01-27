@@ -5,12 +5,19 @@ public class Country : MonoBehaviour
     private bool isObjective;
     private GameBoard scoreBoard;
     private LivesBoard livesBoard;
-    private static bool gameRunning = false;
+    public static bool gameRunning = false;
+
+    public AudioClip popSound;
+    private AudioSource audioSource;
 
     public void Start()
     {
         scoreBoard = GameObject.FindWithTag("Board").GetComponent<GameBoard>();
         livesBoard = GameObject.FindWithTag("Lives").GetComponent<LivesBoard>();
+
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.clip = popSound;
     }
 
     public Country(bool isObjective, Sprite sprite)
@@ -54,7 +61,13 @@ public class Country : MonoBehaviour
 
     private void SelectCountry()
     {
-        if(gameRunning) {
+        if (gameRunning)
+        {
+            if (audioSource != null && popSound != null)
+            {
+                audioSource.Play();
+            }
+
             if (isObjective)
             {
                 scoreBoard.IncreaseScore();
@@ -64,7 +77,7 @@ public class Country : MonoBehaviour
                 livesBoard.DecreaseLives();
             }
 
-            Destroy(gameObject, 0.5f);
+            Destroy(gameObject, popSound != null ? popSound.length : 0);
         }
     }
 

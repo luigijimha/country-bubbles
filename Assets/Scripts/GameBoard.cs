@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class GameBoard : MonoBehaviour
@@ -30,6 +28,8 @@ public class GameBoard : MonoBehaviour
 
     private int level = 1;
     private SpriteRenderer targetImage;
+    public AudioClip bubblesSound;
+    private AudioSource audioSource;
 
     void Start()
     {
@@ -37,6 +37,10 @@ public class GameBoard : MonoBehaviour
         screenHeight = transform.localScale.y * ScreenRatio;
         clock = GameObject.FindWithTag("Clock").GetComponent<Clock>();
         targetImage = GameObject.FindWithTag("Target").GetComponent<SpriteRenderer>();
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.clip = bubblesSound;
+
         InitializeBoard(initialRows, initialColumns, initialObjectives, initialSprites, initialTime, initialLives);
     }
 
@@ -69,11 +73,32 @@ public class GameBoard : MonoBehaviour
         selectedSprites = shuffledCountries.GetRange(0, totalCountries - 1).ToArray();
         Sprite objectiveSprite = shuffledCountries[totalCountries - 1];
 
+        int loopCount = rows*columns / 2;
+
+        // Play a bubble sound loop
+        StartCoroutine(PlayBubbleSoundLoop(loopCount));
+
         // Start instantiation coroutine
         StartCoroutine(InstantiateObjects(positions, countryScale, objectiveSprite, objectives, timeLimit));
 
         GameObject.FindWithTag("Lives").GetComponent<LivesBoard>().SetLives(lives);
         targetImage.sprite = objectiveSprite;
+    }
+
+    private IEnumerator PlayBubbleSoundLoop(int loopCount)
+    {
+        if (bubblesSound == null || audioSource == null)
+        {
+            yield break;
+        }
+
+        float clipDuration = bubblesSound.length/4;
+
+        for (int i = 0; i < loopCount; i++)
+        {
+            audioSource.PlayOneShot(bubblesSound);
+            yield return new WaitForSeconds(clipDuration);
+        }
     }
 
     private IEnumerator InstantiateObjects(
@@ -131,11 +156,6 @@ public class GameBoard : MonoBehaviour
 
         if (--initialObjectives <= 0)
         {
-            Country.StopGame();
-
-            // Reset board and advance to the next level
-            StartCoroutine(DestroyRemainingCountries());
-
             if(level++ == 10) {
                 SceneManager.LoadScene("Win Screen");
             }
@@ -155,6 +175,11 @@ public class GameBoard : MonoBehaviour
 
             // Calculate next total countries
             int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
+
+            Country.StopGame();
+
+            // Reset board and advance to the next level
+            StartCoroutine(DestroyRemainingCountries());
 
             // Reinitialize the board
             InitializeBoard(rows, columns, initialObjectives, maxCountries, timeLimit, lives);

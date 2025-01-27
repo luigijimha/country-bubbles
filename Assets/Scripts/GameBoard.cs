@@ -18,6 +18,8 @@ public class GameBoard : MonoBehaviour
     public int initialColumns = 4;
     public int initialObjectives = 2;
     public int initialSprites = 2;
+    public int initialTime = 75;
+    public int initialLives = 5;
 
     private readonly float imageRatio = 0.15f;
     private readonly float ScreenRatio = 8;
@@ -27,21 +29,18 @@ public class GameBoard : MonoBehaviour
     private float countryHeight;
 
     private int level = 1;
-
-    private TextMeshProUGUI targetCounter;
-    private Image targetImage;
+    private SpriteRenderer targetImage;
 
     void Start()
     {
         screenWidth = transform.localScale.x * ScreenRatio;
         screenHeight = transform.localScale.y * ScreenRatio;
         clock = GameObject.FindWithTag("Clock").GetComponent<Clock>();
-        targetCounter = GameObject.FindWithTag("Counter").GetComponent<TextMeshProUGUI>();
-        targetImage = GameObject.FindWithTag("Target").GetComponent<Image>();
-        InitializeBoard(initialRows, initialColumns, initialObjectives, initialSprites);
+        targetImage = GameObject.FindWithTag("Target").GetComponent<SpriteRenderer>();
+        InitializeBoard(initialRows, initialColumns, initialObjectives, initialSprites, initialTime, initialLives);
     }
 
-    private void InitializeBoard(int rows, int columns, int objectives, int totalCountries)
+    private void InitializeBoard(int rows, int columns, int objectives, int totalCountries, double timeLimit, int lives)
     {
         remainingCountries = new GameObject[rows * columns];
 
@@ -71,17 +70,18 @@ public class GameBoard : MonoBehaviour
         Sprite objectiveSprite = shuffledCountries[totalCountries - 1];
 
         // Start instantiation coroutine
-        StartCoroutine(InstantiateObjects(positions, countryScale, objectiveSprite, objectives));
+        StartCoroutine(InstantiateObjects(positions, countryScale, objectiveSprite, objectives, timeLimit));
 
+        GameObject.FindWithTag("Lives").GetComponent<LivesBoard>().SetLives(lives);
         targetImage.sprite = objectiveSprite;
-        targetCounter.text =$"x{initialObjectives}";
     }
 
     private IEnumerator InstantiateObjects(
         List<(int, int)> positions,
         float countryScale,
         Sprite objectiveSprite,
-        int objectives
+        int objectives,
+        double timeLimit
     )
     {
         int countryCounter = 0;
@@ -105,7 +105,7 @@ public class GameBoard : MonoBehaviour
             yield return new WaitForSeconds(0.05f);
         }
 
-        clock.StartClock();
+        clock.StartClock(timeLimit);
         Country.StartGame();
     }
 
@@ -128,9 +128,8 @@ public class GameBoard : MonoBehaviour
 
     public void IncreaseScore()
     {
-        targetCounter.text =$"x{--initialObjectives}";
 
-        if (initialObjectives <= 0)
+        if (--initialObjectives <= 0)
         {
             Country.StopGame();
 
@@ -158,7 +157,7 @@ public class GameBoard : MonoBehaviour
             int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
 
             // Reinitialize the board
-            InitializeBoard(rows, columns, initialObjectives, maxCountries);
+            InitializeBoard(rows, columns, initialObjectives, maxCountries, timeLimit, lives);
         }
     }
 

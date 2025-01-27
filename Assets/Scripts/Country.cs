@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class Country : MonoBehaviour
@@ -32,10 +31,9 @@ public class Country : MonoBehaviour
 
             if (touch.phase == TouchPhase.Began)
             {
-                RaycastHit hit;
                 Ray ray = Camera.main.ScreenPointToRay(touch.position);
 
-                if (Physics.Raycast(ray, out hit))
+                if (Physics.Raycast(ray, out RaycastHit hit))
                 {
                     if (hit.collider != null && hit.collider.gameObject == gameObject)
                     {

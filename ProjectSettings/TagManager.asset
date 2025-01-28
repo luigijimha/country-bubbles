@@ -10,6 +10,7 @@ TagManager:
   - Target
   - Counter
   - Objective
+  - Button
   layers:
   - Default
   - TransparentFX

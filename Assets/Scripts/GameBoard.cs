@@ -12,12 +12,7 @@ public class GameBoard : MonoBehaviour
     private Sprite[] selectedSprites;
     public GameObject countryPrefab;
     public float padding = 0.1f;
-    public int initialRows = 3;
-    public int initialColumns = 4;
-    public int initialObjectives = 2;
-    public int initialSprites = 2;
-    public int initialTime = 75;
-    public int initialLives = 5;
+    private int remainingObjectives = 1;
 
     private readonly float imageRatio = 0.15f;
     private readonly float ScreenRatio = 8;
@@ -26,10 +21,11 @@ public class GameBoard : MonoBehaviour
     private float countryWidth;
     private float countryHeight;
 
-    private int level = 1;
+    private int level = 0;
     private SpriteRenderer targetImage;
     public AudioClip bubblesSound;
     private AudioSource audioSource;
+    public int levelLimit = 20;
 
     void Start()
     {
@@ -41,7 +37,9 @@ public class GameBoard : MonoBehaviour
         audioSource.playOnAwake = false;
         audioSource.clip = bubblesSound;
 
-        InitializeBoard(initialRows, initialColumns, initialObjectives, initialSprites, initialTime, initialLives);
+        remainingCountries = new GameObject[0];
+
+        IncreaseScore();
     }
 
     private void InitializeBoard(int rows, int columns, int objectives, int totalCountries, double timeLimit, int lives)
@@ -154,9 +152,11 @@ public class GameBoard : MonoBehaviour
     public void IncreaseScore()
     {
 
-        if (--initialObjectives <= 0)
+        if (--remainingObjectives <= 0)
         {
-            if(level++ == 10) {
+            clock.StopClock();
+            
+            if(level++ > levelLimit) {
                 SceneManager.LoadScene("Win Screen");
             }
 
@@ -165,13 +165,13 @@ public class GameBoard : MonoBehaviour
             int rows = Mathf.FloorToInt((float)(Math.Tanh((level - 8.0) / 4.0) + 5.5));
 
             // Calculate the next starting objectives
-            initialObjectives = Mathf.FloorToInt((float)(4.0 * Math.Tanh((level - 5.0) / 4.0) + 7.0));
+            remainingObjectives = Mathf.FloorToInt((float)(4.0 * Math.Tanh((level - 10.0) / 5.0) + 7.0));
 
             // Calculate the next starting time
-            float timeLimit = Mathf.FloorToInt((float)(100.0 / (level + 2.0) + 25.0));
+            float timeLimit = Mathf.FloorToInt((float)(40.0 / (level + 2.0) + 14.0));
 
             // Calculate the next starting lives
-            int lives = Mathf.FloorToInt((float)(30.0 / (level + 12.0) + 3.0));
+            int lives = Mathf.FloorToInt((float)(15.0 / (level + 5.0) + 2.0));
 
             // Calculate next total countries
             int maxCountries = level + 1 > countries.Count ? countries.Count : level + 1;
@@ -182,7 +182,7 @@ public class GameBoard : MonoBehaviour
             StartCoroutine(DestroyRemainingCountries());
 
             // Reinitialize the board
-            InitializeBoard(rows, columns, initialObjectives, maxCountries, timeLimit, lives);
+            InitializeBoard(rows, columns, remainingObjectives, maxCountries, timeLimit, lives);
         }
     }
 

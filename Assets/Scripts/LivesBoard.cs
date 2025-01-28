@@ -20,7 +20,7 @@ public class LivesBoard : MonoBehaviour
 
     void Update()
     {
-        if (lives <= 2)
+        if (lives < 2)
         {
             float scaleModifier = Mathf.Sin(Time.time * scaleSpeed) * scaleAmount;
             transform.localScale = originalScale + new Vector3(scaleModifier, scaleModifier, 0);
